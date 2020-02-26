@@ -8,6 +8,7 @@ public class DriveScript : MonoBehaviour
     public GameObject[] wheels;
     public float torque = 200;
     public float maxSteerAngle = 30;
+    public float maxBrakeForce = 500;
     
     
     void Start()
@@ -15,10 +16,11 @@ public class DriveScript : MonoBehaviour
         //wheelCollider = this.GetComponent<WheelCollider>();
     }
 
-    void Go(float accelarator,float steerAngle)
+    void Go(float accelarator,float steerAngle,float brakeForce)
     {
         accelarator = Mathf.Clamp(accelarator, -1, 1);
         steerAngle = Mathf.Clamp(steerAngle, -1, 1) * maxSteerAngle;
+        brakeForce = Mathf.Clamp(brakeForce, 0, 1) * maxBrakeForce;
         float thurstTorque = accelarator * torque;
         for(int i = 0; i < wheelCollider.Length; i++)
         {
@@ -26,6 +28,10 @@ public class DriveScript : MonoBehaviour
             if(i < 2)
             {
                 wheelCollider[i].steerAngle = steerAngle;
+            }
+            else
+            {
+                wheelCollider[i].brakeTorque = brakeForce;
             }
             
             Quaternion rotation;
@@ -37,11 +43,11 @@ public class DriveScript : MonoBehaviour
        
     }
 
-    
     void Update()
     {
         float accelarator = Input.GetAxis("Vertical");
         float steerAngle = Input.GetAxis("Horizontal");
-        Go(accelarator,steerAngle);
+        float brake = Input.GetAxis("Jump");
+        Go(accelarator,steerAngle,brake);
     }
 }
