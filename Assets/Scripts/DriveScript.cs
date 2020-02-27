@@ -6,6 +6,11 @@ public class DriveScript : MonoBehaviour
 {
     public WheelCollider[] wheelCollider;
     public GameObject[] wheels;
+    public Transform skidTrailPrefab;
+    Transform[] skidTrails = new Transform[4];
+
+    public AudioSource skidSound;
+
     public float torque = 200;
     public float maxSteerAngle = 30;
     public float maxBrakeForce = 500;
@@ -14,6 +19,28 @@ public class DriveScript : MonoBehaviour
     void Start()
     {
         //wheelCollider = this.GetComponent<WheelCollider>();
+    }
+    public void StartSkidTrail(int i)
+    {
+        if (skidTrails[i] == null)
+        {
+            skidTrails[i] = Instantiate(skidTrailPrefab);
+        }
+        skidTrails[i].parent = wheelCollider[i].transform;
+        skidTrails[i].localRotation = Quaternion.Euler(90, 0, 0);
+        skidTrails[i].localPosition = -Vector3.up * wheelCollider[i].radius;
+    }
+    public void EndSkidTrail(int i)
+    {
+        if(skidTrails[i] == null)
+        {
+            return;
+        }
+        Transform holder = skidTrails[i];
+        skidTrails[i] = null;
+        holder.parent = null;
+        holder.rotation = Quaternion.Euler(90, 0, 0);
+        Destroy(holder.gameObject, 30);
     }
 
     void Go(float accelarator,float steerAngle,float brakeForce)
@@ -43,11 +70,40 @@ public class DriveScript : MonoBehaviour
        
     }
 
+    void CheckForSkid()
+    {
+        int skidCount = 0;
+        for(int i = 0; i < wheelCollider.Length; i++)
+        {
+            WheelHit wheelHit;
+            wheelCollider[i].GetGroundHit(out wheelHit);
+            if(Mathf.Abs(wheelHit.forwardSlip) >= 0.4f|| Mathf.Abs(wheelHit.sidewaysSlip) >= 0.4f)
+            {
+                skidCount++;
+                if (!skidSound.isPlaying)
+                {
+                    skidSound.Play();
+                }
+                StartSkidTrail(i);
+            }
+            else
+            {
+                EndSkidTrail(i);
+            }
+        }
+
+        if(skidCount == 0 && skidSound.isPlaying)
+        {
+            skidSound.Stop();
+        }
+    }
+
     void Update()
     {
         float accelarator = Input.GetAxis("Vertical");
         float steerAngle = Input.GetAxis("Horizontal");
         float brake = Input.GetAxis("Jump");
         Go(accelarator,steerAngle,brake);
+        CheckForSkid();
     }
 }
