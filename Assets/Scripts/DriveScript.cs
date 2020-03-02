@@ -5,9 +5,14 @@ using UnityEngine;
 public class DriveScript : MonoBehaviour
 {
     public WheelCollider[] wheelCollider;
+
     public GameObject[] wheels;
+
     public Transform skidTrailPrefab;
     Transform[] skidTrails = new Transform[4];
+
+    public ParticleSystem smokePrefab;
+    ParticleSystem[] skidSmoke = new ParticleSystem[4];
 
     public AudioSource skidSound;
 
@@ -19,6 +24,11 @@ public class DriveScript : MonoBehaviour
     void Start()
     {
         //wheelCollider = this.GetComponent<WheelCollider>();
+        for(int i = 0; i < 4; i++)
+        {
+            skidSmoke[i] = Instantiate(smokePrefab);
+            skidSmoke[i].Stop();
+        }
     }
     public void StartSkidTrail(int i)
     {
@@ -85,6 +95,8 @@ public class DriveScript : MonoBehaviour
                     skidSound.Play();
                 }
                 StartSkidTrail(i);
+                skidSmoke[i].transform.position = wheelCollider[i].transform.position - wheelCollider[i].transform.up * wheelCollider[i].radius;
+                skidSmoke[i].Emit(1); 
             }
             else
             {
