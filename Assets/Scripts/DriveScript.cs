@@ -7,6 +7,7 @@ public class DriveScript : MonoBehaviour
     public WheelCollider[] wheelCollider;
 
     public GameObject[] wheels;
+    public GameObject brakeLight;
 
     public Transform skidTrailPrefab;
     Transform[] skidTrails = new Transform[4];
@@ -23,6 +24,7 @@ public class DriveScript : MonoBehaviour
     
     void Start()
     {
+        brakeLight.SetActive(false);
         //wheelCollider = this.GetComponent<WheelCollider>();
         for(int i = 0; i < 4; i++)
         {
@@ -58,6 +60,12 @@ public class DriveScript : MonoBehaviour
         accelarator = Mathf.Clamp(accelarator, -1, 1);
         steerAngle = Mathf.Clamp(steerAngle, -1, 1) * maxSteerAngle;
         brakeForce = Mathf.Clamp(brakeForce, 0, 1) * maxBrakeForce;
+
+        if(brakeForce!=0)
+            brakeLight.SetActive(true);
+        else
+            brakeLight.SetActive(false);
+
         float thurstTorque = accelarator * torque;
         for(int i = 0; i < wheelCollider.Length; i++)
         {
