@@ -21,7 +21,6 @@ public class DriveScript : MonoBehaviour
     public float maxSteerAngle = 30;
     public float maxBrakeForce = 500;
     
-    
     void Start()
     {
         brakeLight.SetActive(false);
@@ -66,7 +65,10 @@ public class DriveScript : MonoBehaviour
         else
             brakeLight.SetActive(false);
 
-        float thurstTorque = accelarator * torque;
+        float thurstTorque = 0;
+        if(engineScript.currentSpeed < engineScript.maxSpeed)
+            thurstTorque = accelarator * torque;
+
         for(int i = 0; i < wheelCollider.Length; i++)
         {
             wheelCollider[i].motorTorque = thurstTorque;
